@@ -19,8 +19,25 @@ typedef struct _Student {
 	int bodovi;
 }stud;
 
+int brojStudenata();
+stud* dinamickoAlociranje(int brojac);
+int ucitavanjeStudenata(int brojac, stud* studenti);
+int ispis(int brojac, stud *studenti);
+
 
 int main() {
+	int brojac;
+	brojac = brojStudenata();
+	if (brojac <= 0) return 1;
+	stud* studenti = dinamickoAlociranje(brojac);
+	if (studenti == NULL) return 1;
+	ucitavanjeStudenata(brojac, studenti);
+	ispis(brojac, studenti);
+	free(studenti);
+	return 0;
+}
+
+int brojStudenata() {
 	char buffer[50] = { 0 };
 	FILE* fp = fopen("popis.txt", "r");
 	if (!fp) {
@@ -28,16 +45,26 @@ int main() {
 		return -1;
 	}
 	int brojac = 0;
-	while (!feof(fp)) {
-		fgets(buffer, sizeof(buffer), fp);
+	while (fgets(buffer, sizeof(buffer), fp)!=NULL){
 		brojac++;
 	}
-	rewind(fp);
-	stud* studenti = NULL;
-	studenti = (stud*)malloc(brojac * sizeof(stud));
+	fclose(fp);
+	return brojac;
+}
+
+stud* dinamickoAlociranje(int brojac) {
+	stud* studenti = (stud*)malloc(brojac * sizeof(stud));
 	if (!studenti) {
 		printf("greska");
-		free(studenti);
+		return NULL;
+	}
+	return studenti;
+}
+
+int ucitavanjeStudenata(int brojac, stud* studenti) {
+	FILE* fp = fopen("popis.txt", "r");
+	if (!fp) {
+		printf("greška");
 		return -1;
 	}
 	int i = 0;
@@ -45,11 +72,15 @@ int main() {
 		fscanf(fp, "%s %s %d", studenti[i].name, studenti[i].lName, &studenti[i].bodovi);
 		i++;
 	}
+	fclose(fp);
+	return 0;
+}
+
+int ispis(int brojac, stud* studenti) {
 	int j = 0;
 	float max_br_bodova = 50;
 	for (j = 0; j < brojac; j++) {
-		printf("%s %s %d %.2f \n", studenti[j].name, studenti[j].lName, studenti[j].bodovi, (studenti[j].bodovi/max_br_bodova)*100);
+		printf("%s %s %d %.2f \n", studenti[j].name, studenti[j].lName, studenti[j].bodovi, (studenti[j].bodovi / max_br_bodova) * 100);
 	}
-	fclose(fp);
 	return 0;
 }
